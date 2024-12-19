@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react'
+import { useWallet } from '@solana/wallet-adapter-react'
 import { useToast } from "@/components/ui/use-toast"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -18,19 +19,29 @@ import { GovernanceAnalytics } from './GovernanceAnalytics'
 import { colors } from '../lib/colors'
 import Link from 'next/link'
 import { Settings, FileText } from 'lucide-react'
+import { WalletButton } from '@/components/ui/wallet-button'
 
 export function IWOInterface() {
   const { bids, allocatedTokens, timeRemaining, totalWeight, submitBid } = useIWOData()
   const [bidAmount, setBidAmount] = useState(0)
   const [vestingPeriod, setVestingPeriod] = useState(6)
-  const [walletAddress, setWalletAddress] = useState('')
+  const { publicKey } = useWallet()
   const { toast } = useToast()
 
   const handleSubmitBid = async () => {
-    if (bidAmount > 0 && vestingPeriod > 0 && walletAddress) {
+    if (!publicKey) {
+      toast({
+        title: "Error",
+        description: "Please connect your wallet before submitting a bid.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (bidAmount > 0 && vestingPeriod > 0) {
       try {
-        const signature = await submitBidToBlockchain(bidAmount, vestingPeriod, walletAddress);
-        await submitBid(bidAmount, vestingPeriod, walletAddress);
+        const signature = await submitBidToBlockchain(bidAmount, vestingPeriod, publicKey.toString());
+        await submitBid(bidAmount, vestingPeriod, publicKey.toString());
         toast({
           title: "Bid Submitted",
           description: `Your bid of ${formatNumber(bidAmount)} BARK tokens with a ${vestingPeriod} month vesting period has been submitted. Transaction signature: ${signature}`,
@@ -86,16 +97,16 @@ export function IWOInterface() {
                 Settings
               </Button>
             </Link>
+            <WalletButton />
           </div>
         </CardHeader>
         <CardContent className="space-y-6 p-6">
           <div className="space-y-2">
-            <Label htmlFor="walletAddress" style={{color: colors.secondary}}>Solana Wallet Address</Label>
+            <Label htmlFor="walletAddress" style={{color: colors.secondary}}>Connected Wallet Address</Label>
             <Input
               id="walletAddress"
-              value={walletAddress}
-              onChange={(e) => setWalletAddress(e.target.value)}
-              placeholder="Enter your Solana wallet address"
+              value={publicKey ? publicKey.toString() : 'Not connected'}
+              readOnly
               className="border-2"
               style={{borderColor: colors.secondary, backgroundColor: colors.lightGray, color: colors.secondary}}
             />

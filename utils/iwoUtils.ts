@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Connection, PublicKey, clusterApiUrl, Transaction, SystemProgram, sendAndConfirmTransaction } from '@solana/web3.js';
-import { Program, AnchorProvider, Idl, BN, AnchorError } from '@coral-xyz/anchor';
+import { AnchorProvider, Program, Idl, AnchorError } from '@coral-xyz/anchor';
 import idl from '@/lib/programs/iwo_program_idl.json';
+import BN from 'bn.js';
 
 export const TOTAL_SUPPLY = 18_446_744_073;
 export const CIRCULATING_SUPPLY = 18_228_391_052.057774;
@@ -39,14 +40,16 @@ export async function initializeSolanaConnection() {
         throw new Error('IDL is undefined. Make sure the IDL file is properly imported.');
       }
 
+      // Ensure the IDL is properly structured
       const completeIdl: Idl = {
-        ...(idl as unknown as Idl),
+        ...idl as unknown as Idl,
         metadata: {
-          name: "iwo_program",
-          version: "0.1.0",
-          spec: ''
+          address: IWO_POOL_ID.toString(),
         },
       };
+
+      console.log('Initializing program with IDL:', JSON.stringify(completeIdl, null, 2));
+      console.log('IWO_POOL_ID:', IWO_POOL_ID.toString());
 
       program = new Program(completeIdl, IWO_POOL_ID, provider);
       
@@ -55,7 +58,7 @@ export async function initializeSolanaConnection() {
       }
 
       console.log('Program initialized successfully');
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error initializing program:', error);
       if (error instanceof AnchorError) {
         console.error('AnchorError:', error.message);
@@ -121,12 +124,17 @@ export async function submitBidToBlockchain(amount: number, vestingPeriod: numbe
     const signature = await sendAndConfirmTransaction(
       connection,
       transaction,
-      [wallet]
+      [wallet.payer],
+      { commitment: 'confirmed' }
     );
     return signature;
-  } catch (error) {
-    console.error('Error submitting bid to blockchain:', error);
-    throw error;
+  } catch (error: unknown) {
+    console.error('Error submitting bid:', error);
+    if (error instanceof Error) {
+      throw new Error(`Failed to submit bid: ${error.message}`);
+    } else {
+      throw new Error('Failed to submit bid: Unknown error');
+    }
   }
 }
 
@@ -210,9 +218,13 @@ export function useIWOData(chain: 'solana' | 'sui' = 'solana') {
       setAllocatedTokens(allocatedTokens + amount);
       setTotalWeight(totalWeight + weight);
       return signature;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error submitting bid:', error);
-      throw error;
+      if (error instanceof Error) {
+        throw new Error(`Failed to submit bid: ${error.message}`);
+      } else {
+        throw new Error('Failed to submit bid: Unknown error');
+      }
     }
   };
 

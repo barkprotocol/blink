@@ -87,4 +87,3 @@ export function BARKTokenChart({ bids }: BARKTokenChartProps) {
     </Card>
   )
 }
-

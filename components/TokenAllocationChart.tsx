@@ -76,10 +76,13 @@ export function TokenAllocationChart({ bids, totalWeight }: TokenAllocationChart
   const [activeIndex, setActiveIndex] = useState(0);
   const availableTokens = CIRCULATING_SUPPLY;
 
-  const data = useMemo(() => bids.map(bid => ({
-    name: bid.userId.slice(0, 6) + '...' + bid.userId.slice(-4),
-    value: calculateTokenAllocation(bid, totalWeight, availableTokens)
-  })), [bids, totalWeight, availableTokens]);
+  const data = useMemo(() => bids.map(bid => {
+    const allocation = calculateTokenAllocation(bid, totalWeight, availableTokens);
+    return {
+      name: bid.userId.slice(0, 6) + '...' + bid.userId.slice(-4),
+      value: isNaN(allocation) ? 0 : allocation
+    };
+  }).filter(item => item.value > 0), [bids, totalWeight, availableTokens]);
 
   const onPieEnter = (_: any, index: number) => {
     setActiveIndex(index);
@@ -101,59 +104,69 @@ export function TokenAllocationChart({ bids, totalWeight }: TokenAllocationChart
             value: {
               label: "Allocated Tokens",
               color: colors.darkGray,
-              valueFormatter: (value: number) => `${value.toLocaleString()} BARK`,
             },
           }}
           className="h-[400px]"
         >
           <ResponsiveContainer width="100%" height="100%" aria-label="Pie chart showing BARK token allocation among bidders">
-            <PieChart>
-              <Pie
-                activeIndex={activeIndex}
-                activeShape={renderActiveShape}
-                data={data}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-                onMouseEnter={onPieEnter}
-              >
-                {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={colors.chartColors[index % colors.chartColors.length]} />
-                ))}
-              </Pie>
-              <Legend 
-                formatter={(value, entry: any) => (
-                  <span style={{ color: colors.secondary }}>{value}</span>
-                )}
-              />
-              <ChartTooltip
-                content={
-                  ({ active, payload }) => {
-                    if (active && payload && payload.length) {
-                      const data = payload[0].payload;
-                      return (
-                        <ChartTooltipContent
-                          content={
-                            <div className="flex flex-col gap-1">
-                              <p className="text-sm font-bold">{data.name}</p>
-                              <p className="text-sm">{data.value.toLocaleString()} BARK</p>
-                            </div>
-                          }
-                        />
-                      );
+            {data.length === 0 ? (
+              <text x="50%" y="50%" textAnchor="middle" fill={colors.secondary}>
+                No bids available
+              </text>
+            ) : (
+              <PieChart>
+                <title>BARK Token Allocation</title>
+                <Pie
+                  activeIndex={activeIndex}
+                  activeShape={(props: any) => renderActiveShape(props as RenderActiveShapeProps)}
+                  data={data}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                  onMouseEnter={onPieEnter}
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  labelLine={false}
+                >
+                  {data.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={colors.chartColors[index % colors.chartColors.length]} />
+                  ))}
+                </Pie>
+                <Legend 
+                  formatter={(value: string) => (
+                    <span style={{ color: colors.secondary, fontSize: '12px' }}>{value}</span>
+                  )}
+                  layout="vertical"
+                  align="right"
+                  verticalAlign="middle"
+                />
+                <ChartTooltip
+                  content={
+                    ({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        const data = payload[0].payload;
+                        return (
+                          <ChartTooltipContent
+                            content={
+                              <div className="flex flex-col gap-1">
+                                <p className="text-sm font-bold">{data.name}</p>
+                                <p className="text-sm">{data.value.toLocaleString()} BARK</p>
+                              </div>
+                            }
+                          />
+                        );
+                      }
+                      return null;
                     }
-                    return null;
                   }
-                }
-              />
-            </PieChart>
+                />
+              </PieChart>
+            )}
           </ResponsiveContainer>
         </ChartContainer>
       </CardContent>
     </Card>
   )
 }
-

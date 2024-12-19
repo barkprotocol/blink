@@ -52,6 +52,13 @@ export function BARKTokenIWOAnalytics({ bids }: BARKTokenIWOAnalyticsProps) {
     setActiveDataKey(null);
   };
 
+  const formatValue = (value: number, dataKey: string): string => {
+    if (dataKey === 'totalBids') return `${value.toFixed(0)} bids`;
+    if (dataKey === 'averageBidAmount') return `${value.toFixed(2)} BARK`;
+    if (dataKey === 'averageVestingPeriod') return `${value.toFixed(1)} months`;
+    return value.toString();
+  };
+
   return (
     <Card className="w-full border-2" style={{borderColor: colors.accent, backgroundColor: colors.primary}}>
       <CardHeader>
@@ -76,39 +83,48 @@ export function BARKTokenIWOAnalytics({ bids }: BARKTokenIWOAnalyticsProps) {
               },
             }}
           >
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" aria-label="BARK Token IWO Analytics Chart">
               <LineChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                 <XAxis 
                   dataKey="timestamp" 
                   stroke={colors.darkGray}
-                  tickFormatter={(value) => new Date(value).toLocaleDateString()}
+                  tickFormatter={(value) => new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                 />
                 <YAxis 
                   yAxisId="left" 
                   stroke={colors.darkGray}
-                  tickFormatter={(value) => value.toFixed(0)}
+                  tickFormatter={(value) => `${value.toFixed(0)}`}
+                  label={{ value: 'Total Bids / Avg Amount', angle: -90, position: 'insideLeft' }}
                 />
                 <YAxis 
                   yAxisId="right" 
                   orientation="right" 
                   stroke={colors.darkGray}
-                  tickFormatter={(value) => value.toFixed(1)}
+                  tickFormatter={(value) => `${value.toFixed(1)} mo`}
+                  label={{ value: 'Avg Vesting Period (months)', angle: 90, position: 'insideRight' }}
                 />
-                <ChartTooltip 
-                  content={
-                    <ChartTooltipContent 
-                      formatValue={(value: number, dataKey: string) => {
-                        if (dataKey === 'totalBids') return value.toFixed(0);
-                        if (dataKey === 'averageBidAmount') return value.toFixed(2);
-                        if (dataKey === 'averageVestingPeriod') return value.toFixed(1);
-                        return value;
-                      }}
-                    />
-                  }
+                <ChartTooltip
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      const data = payload[0].payload as ChartData;
+                      return (
+                        <div className="bg-white p-2 border border-gray-200 rounded shadow">
+                          <p className="text-sm font-bold">{new Date(data.timestamp).toLocaleDateString()}</p>
+                          {payload.map((entry, index) => (
+                            <p key={index} className="text-sm" style={{ color: entry.color }}>
+                              {`${entry.name}: ${formatValue(entry.value as number, entry.dataKey as string)}`}
+                            </p>
+                          ))}
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
                 />
-                <Legend 
-                  onMouseEnter={handleMouseEnter}
+                <Legend
+                  onMouseEnter={(e) => handleMouseEnter(e.dataKey as string)}
                   onMouseLeave={handleMouseLeave}
+                  wrapperStyle={{ cursor: 'pointer' }}
                 />
                 <Line 
                   yAxisId="left" 
@@ -145,4 +161,3 @@ export function BARKTokenIWOAnalytics({ bids }: BARKTokenIWOAnalyticsProps) {
     </Card>
   )
 }
-

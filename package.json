@@ -1,6 +1,6 @@
 {
   "name": "bark-iwo-platform",
-  "description": "The **BARK Token Initial Wallet Offering (IWO) Interface** is a web-based application designed to provide a seamless and transparent experience for participants in the BARK token sale.",
+  "description": "The BARK Token Initial Wallet Offering (IWO) Interface** is a web-based application designed to provide a seamless and transparent experience for participants in the BARK token sale.",
   "version": "1.0.0",
   "author": "BARK Protocol",
   "private": true,
@@ -43,11 +43,17 @@
     "@radix-ui/react-toggle-group": "^1.1.1",
     "@radix-ui/react-tooltip": "^1.1.6",
     "@solana/spl-governance": "^0.3.28",
+    "@solana/wallet-adapter-base": "^0.9.23",
+    "@solana/wallet-adapter-react": "^0.15.35",
+    "@solana/wallet-adapter-react-ui": "^0.9.35",
+    "@solana/wallet-adapter-wallets": "^0.19.32",
     "@solana/web3.js": "^1.98.0",
     "@supabase/supabase-js": "^2.47.9",
     "@types/node": "22.10.2",
     "@types/react": "19.0.2",
     "@types/react-dom": "19.0.2",
+    "axios": "^1.7.9",
+    "bn.js": "^5.2.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "1.0.0",
@@ -78,7 +84,7 @@
     "eslint": "^8.57.1",
     "eslint-config-next": "^15.1.1",
     "postcss": "8.4.49",
-    "tailwindcss": "3.4.17",
-    "prisma": "^6.1.0"
+    "prisma": "^6.1.0",
+    "tailwindcss": "3.4.17"
   }
 }
