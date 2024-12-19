@@ -1,0 +1,151 @@
+{
+    "version": "0.1.0",
+    "name": "iwo_program",
+    "instructions": [
+      {
+        "name": "initialize",
+        "accounts": [
+          {
+            "name": "iwoPool",
+            "isMut": true,
+            "isSigner": true
+          },
+          {
+            "name": "authority",
+            "isMut": true,
+            "isSigner": true
+          },
+          {
+            "name": "systemProgram",
+            "isMut": false,
+            "isSigner": false
+          }
+        ],
+        "args": [
+          {
+            "name": "startTime",
+            "type": "i64"
+          },
+          {
+            "name": "endTime",
+            "type": "i64"
+          },
+          {
+            "name": "totalTokens",
+            "type": "u64"
+          }
+        ]
+      },
+      {
+        "name": "submitBid",
+        "accounts": [
+          {
+            "name": "iwoPool",
+            "isMut": true,
+            "isSigner": false
+          },
+          {
+            "name": "bidder",
+            "isMut": true,
+            "isSigner": true
+          },
+          {
+            "name": "systemProgram",
+            "isMut": false,
+            "isSigner": false
+          }
+        ],
+        "args": [
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "vestingPeriod",
+            "type": "u8"
+          }
+        ]
+      }
+    ],
+    "accounts": [
+      {
+        "name": "IwoPool",
+        "type": {
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "authority",
+              "type": "publicKey"
+            },
+            {
+              "name": "startTime",
+              "type": "i64"
+            },
+            {
+              "name": "endTime",
+              "type": "i64"
+            },
+            {
+              "name": "totalTokens",
+              "type": "u64"
+            },
+            {
+              "name": "allocatedTokens",
+              "type": "u64"
+            },
+            {
+              "name": "totalBids",
+              "type": "u64"
+            }
+          ]
+        }
+      },
+      {
+        "name": "Bid",
+        "type": {
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "bidder",
+              "type": "publicKey"
+            },
+            {
+              "name": "amount",
+              "type": "u64"
+            },
+            {
+              "name": "vestingPeriod",
+              "type": "u8"
+            },
+            {
+              "name": "weight",
+              "type": "u64"
+            },
+            {
+              "name": "timestamp",
+              "type": "i64"
+            }
+          ]
+        }
+      }
+    ],
+    "errors": [
+      {
+        "code": 6000,
+        "name": "IwoNotStarted",
+        "msg": "IWO has not started yet"
+      },
+      {
+        "code": 6001,
+        "name": "IwoEnded",
+        "msg": "IWO has already ended"
+      },
+      {
+        "code": 6002,
+        "name": "InsufficientFunds",
+        "msg": "Insufficient funds for the bid"
+      }
+    ]
+  }
+  
+  

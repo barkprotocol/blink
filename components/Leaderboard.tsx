@@ -11,7 +11,7 @@ export function Leaderboard({ bids }: LeaderboardProps) {
   const sortedBids = [...bids].sort((a, b) => b.weight - a.weight).slice(0, 5)
 
   return (
-    <Card className="border-2" style={{borderColor: colors.accent, backgroundColor: colors.primary}}>
+    <Card className="w-full border-2" style={{borderColor: colors.accent, backgroundColor: colors.primary}}>
       <CardHeader>
         <CardTitle className="text-xl font-bold" style={{color: colors.secondary}}>BARK Token Bid Leaderboard</CardTitle>
         <CardDescription style={{color: colors.darkGray}}>Top 5 bids by weight</CardDescription>

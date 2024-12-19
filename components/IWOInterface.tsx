@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { useToast } from "@/hooks/use-toast"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { useToast } from "@/components/ui/use-toast"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
@@ -11,21 +11,23 @@ import { useIWOData, CIRCULATING_SUPPLY, MAX_SUPPLY, LOCKED_SUPPLY, calculateBid
 import { BidSimulator } from './BidSimulator'
 import { Leaderboard } from './Leaderboard'
 import { AdvancedAnalytics } from './AdvancedAnalytics'
-import { TwoFactorAuth } from './TwoFactorAuth'
-import { BARKTokenChart } from './BARKTokenChart'
 import { TokenAllocationChart } from './TokenAllocationChart'
+import { BARKTokenIWOAnalytics } from './BARKTokenIWOAnalytics'
+import { BARKTokenPriceChart } from './BARKTokenPriceChart'
+import { GovernanceAnalytics } from './GovernanceAnalytics'
 import { colors } from '../lib/colors'
+import Link from 'next/link'
+import { Settings } from 'lucide-react'
 
 export function IWOInterface() {
   const { bids, allocatedTokens, timeRemaining, totalWeight, submitBid } = useIWOData()
   const [bidAmount, setBidAmount] = useState(0)
   const [vestingPeriod, setVestingPeriod] = useState(6)
   const [walletAddress, setWalletAddress] = useState('')
-  const [is2FAVerified, setIs2FAVerified] = useState(false)
   const { toast } = useToast()
 
   const handleSubmitBid = async () => {
-    if (bidAmount > 0 && vestingPeriod > 0 && walletAddress && is2FAVerified) {
+    if (bidAmount > 0 && vestingPeriod > 0 && walletAddress) {
       try {
         const signature = await submitBidToBlockchain(bidAmount, vestingPeriod, walletAddress);
         await submitBid(bidAmount, vestingPeriod, walletAddress);
@@ -35,7 +37,6 @@ export function IWOInterface() {
         })
         setBidAmount(0)
         setVestingPeriod(6)
-        setIs2FAVerified(false)
       } catch (error) {
         toast({
           title: "Error",
@@ -44,14 +45,6 @@ export function IWOInterface() {
         })
       }
     }
-  }
-
-  const handle2FAVerify = async (code: string) => {
-    // In a real application, you would verify the 2FA code with your backend
-    // This is a mock implementation
-    const isValid = code === '123456';
-    setIs2FAVerified(isValid);
-    return isValid;
   }
 
   useEffect(() => {
@@ -65,13 +58,25 @@ export function IWOInterface() {
   }, [allocatedTokens, toast])
 
   return (
-    <div className="container mx-auto p-4 space-y-8" style={{backgroundColor: colors.lightGray}}>
+    <div className="container mx-auto p-4 space-y-8 max-w-8xl" style={{backgroundColor: colors.lightGray}}>
       <Card className="border-2" style={{borderColor: colors.accent, backgroundColor: colors.primary}}>
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold" style={{color: colors.secondary}}>BARK Token Initial Weight Offering (IWO)</CardTitle>
-          <CardDescription style={{color: colors.darkGray}}>Participate in the BARK token sale and track your bid in real-time</CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-2xl font-bold" style={{color: colors.secondary}}>BARK Token Initial Weight Offering (IWO)</CardTitle>
+            <CardDescription style={{color: colors.darkGray}}>Participate in the BARK token sale and track your bid in real-time</CardDescription>
+          </div>
+          <Link href="/settings">
+            <Button variant="outline" className="flex items-center gap-2 hover:bg-accent hover:text-primary" style={{
+              borderColor: colors.accent,
+              color: colors.secondary,
+              transition: 'all 0.3s ease',
+            }}>
+              <Settings size={18} />
+              Settings
+            </Button>
+          </Link>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6 p-6">
           <div className="space-y-2">
             <Label htmlFor="walletAddress" style={{color: colors.secondary}}>Solana Wallet Address</Label>
             <Input
@@ -108,8 +113,7 @@ export function IWOInterface() {
             />
           </div>
           <BidSimulator bidAmount={bidAmount} vestingPeriod={vestingPeriod} />
-          {!is2FAVerified && <TwoFactorAuth onVerify={handle2FAVerify} />}
-          <Button onClick={handleSubmitBid} disabled={!is2FAVerified} className="w-full" style={{backgroundColor: colors.accent, color: colors.secondary}}>
+          <Button onClick={handleSubmitBid} className="w-full py-3 text-lg font-semibold" style={{backgroundColor: colors.accent, color: colors.primary}}>
             Submit Bid
           </Button>
         </CardContent>
@@ -128,8 +132,14 @@ export function IWOInterface() {
           </div>
         </CardFooter>
       </Card>
-      <BARKTokenChart bids={bids} />
-      <TokenAllocationChart bids={bids} totalWeight={totalWeight} />
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+        <BARKTokenPriceChart />
+        <BARKTokenIWOAnalytics bids={bids} />
+      </div>
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+        <TokenAllocationChart bids={bids} totalWeight={totalWeight} />
+        <GovernanceAnalytics />
+      </div>
       <Leaderboard bids={bids} />
       <AdvancedAnalytics bids={bids} />
     </div>
