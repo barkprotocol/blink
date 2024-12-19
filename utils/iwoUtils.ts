@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Connection, PublicKey, clusterApiUrl, Transaction, SystemProgram, sendAndConfirmTransaction, LAMPORTS_PER_SOL } from '@solana/web3.js';
-import { Program, AnchorProvider, web3 as anchorWeb3 } from '@project-serum/anchor';
+import { Program, AnchorProvider, web3 as anchorWeb3 } from '@coral-xyz/anchor';
 
 export const TOTAL_SUPPLY = 18_446_744_073;
 export const CIRCULATING_SUPPLY = 18_228_391_052.057774;
@@ -17,8 +17,8 @@ export interface Bid {
   timestamp: string;
 }
 
-const BARK_TOKEN_MINT_ADDRESS = new PublicKey(process.env.NEXT_PUBLIC_TOKEN_PROGRAM_ID || '');
-const IWO_POOL_ID = new PublicKey(process.env.NEXT_PUBLIC_IWO_CONTRACT_ADDRESS || '');
+const BARK_TOKEN_MINT_ADDRESS = new PublicKey(process.env.NEXT_PUBLIC_TOKEN_PROGRAM_ID || '2NTvEssJ2i998V2cMGT4Fy3JhyFnAzHFonDo9dbAkVrg');
+const IWO_POOL_ID = new PublicKey(process.env.NEXT_PUBLIC_IWO_CONTRACT_ADDRESS || 'BARKkeAwhTuFzcLHX4DjotRsmjXQ1MshGrZbn1CUQqMo');
 const VESTING_PROGRAM_ID = new PublicKey('GKb2vF9RE1UPhV6hQi7yiL5tCsdajbJHyTm87zhN3qiU');
 
 let connection: Connection;
