@@ -2,21 +2,21 @@
 
 ## Table of Contents
 
-1. [Introduction](#introduction)  
-2. [System Architecture](#system-architecture)  
-3. [Key Components](#key-components)  
-4. [Core Functionalities](#core-functionalities)  
-5. [Data Flow](#data-flow)  
-6. [Security Measures](#security-measures)  
-7. [Integration Points](#integration-points)  
-8. [Deployment](#deployment)  
-9. [Future Enhancements](#future-enhancements)  
+1. [Introduction](#introduction)
+2. [System Architecture](#system-architecture)
+3. [Key Components](#key-components)
+4. [Core Functionalities](#core-functionalities)
+5. [Data Flow](#data-flow)
+6. [Security Measures](#security-measures)
+7. [Integration Points](#integration-points)
+8. [Deployment](#deployment)
+9. [Future Enhancements](#future-enhancements) 
 
 ---
 
 ## 1. Introduction
 
-The **BARK Initial Wallet Offering (IWO) Interface** is a web-based application designed to provide a seamless and transparent experience for participants in the BARK token sales. With features like real-time statistics, secure bid submission, and dynamic bid weight calculations, the platform ensures a user-friendly and blockchain-integrated process.
+The **BARK Initial Wallet Offering (IWO) Interface** is a web-based application designed to provide a seamless and transparent experience for participants in the BARK token sales. With features like real-time statistics, secure bid submission, and dynamic bid weight calculations, the platform ensures a user-friendly and Solana blockchain-integrated process.
 
 ---
 
@@ -80,11 +80,11 @@ Tokens are allocated at the end of the offering based on bid weight and locked i
 
 ## 5. Data Flow
 
-1. **Frontend Interaction**: Users input bid details through the UI.  
-2. **Simulation**: Client-side bid weight calculation for immediate feedback.  
-3. **Blockchain Submission**: Signed transaction data sent to Solana smart contracts.  
+1. **Frontend Interaction**: User inputs (bid amount, vesting period, wallet address) are captured in the IWO Interface component.  
+2. **Bid Simulation**: Bid simulation is performed client-side using the Bid Simulator component. 
+3. **Blockchain Submission**: Signed transaction data sent to Solana programs.  
 4. **Backend Processing**: Validates and updates the state.  
-5. **Frontend Updates**: Data fetched from the blockchain for real-time visualization.  
+5. **Frontend Updates**: Data fetched from the Solana blockchain for real-time visualization.  
 
 ---
 

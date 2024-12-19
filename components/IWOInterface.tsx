@@ -17,7 +17,7 @@ import { BARKTokenPriceChart } from './BARKTokenPriceChart'
 import { GovernanceAnalytics } from './GovernanceAnalytics'
 import { colors } from '../lib/colors'
 import Link from 'next/link'
-import { Settings } from 'lucide-react'
+import { Settings, FileText } from 'lucide-react'
 
 export function IWOInterface() {
   const { bids, allocatedTokens, timeRemaining, totalWeight, submitBid } = useIWOData()
@@ -58,23 +58,35 @@ export function IWOInterface() {
   }, [allocatedTokens, toast])
 
   return (
-    <div className="container mx-auto p-4 space-y-8 max-w-8xl" style={{backgroundColor: colors.lightGray}}>
+    <div className="container mx-auto p-4 space-y-8 max-w-7xl" style={{backgroundColor: colors.lightGray}}>
       <Card className="border-2" style={{borderColor: colors.accent, backgroundColor: colors.primary}}>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle className="text-2xl font-bold" style={{color: colors.secondary}}>BARK Token Initial Weight Offering (IWO)</CardTitle>
             <CardDescription style={{color: colors.darkGray}}>Participate in the BARK token sale and track your bid in real-time</CardDescription>
           </div>
-          <Link href="/settings">
-            <Button variant="outline" className="flex items-center gap-2 hover:bg-accent hover:text-primary" style={{
-              borderColor: colors.accent,
-              color: colors.secondary,
-              transition: 'all 0.3s ease',
-            }}>
-              <Settings size={18} />
-              Settings
-            </Button>
-          </Link>
+          <div className="flex space-x-2">
+            <Link href="/about">
+              <Button variant="outline" className="flex items-center gap-2 hover:bg-accent hover:text-primary" style={{
+                borderColor: colors.accent,
+                color: colors.secondary,
+                transition: 'all 0.3s ease',
+              }}>
+                <FileText size={18} />
+                About
+              </Button>
+            </Link>
+            <Link href="/settings">
+              <Button variant="outline" className="flex items-center gap-2 hover:bg-accent hover:text-primary" style={{
+                borderColor: colors.accent,
+                color: colors.secondary,
+                transition: 'all 0.3s ease',
+              }}>
+                <Settings size={18} />
+                Settings
+              </Button>
+            </Link>
+          </div>
         </CardHeader>
         <CardContent className="space-y-6 p-6">
           <div className="space-y-2">
