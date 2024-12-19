@@ -1,10 +1,11 @@
 "use client"
 
+import { useState, useMemo } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { Line, LineChart, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts'
-import { colors } from '../lib/colors'
-import { Bid } from '../utils/iwoUtils'
+import { Line, LineChart, XAxis, YAxis, Legend, ResponsiveContainer } from 'recharts'
+import { colors } from '@/lib/colors'
+import { Bid } from '@/utils/iwoUtils'
 
 interface ChartData {
   timestamp: string;
@@ -39,7 +40,17 @@ function calculateChartData(bids: Bid[]): ChartData[] {
 }
 
 export function BARKTokenIWOAnalytics({ bids }: BARKTokenIWOAnalyticsProps) {
-  const chartData = calculateChartData(bids);
+  const [activeDataKey, setActiveDataKey] = useState<string | null>(null);
+
+  const chartData = useMemo(() => calculateChartData(bids), [bids]);
+
+  const handleMouseEnter = (dataKey: string) => {
+    setActiveDataKey(dataKey);
+  };
+
+  const handleMouseLeave = () => {
+    setActiveDataKey(null);
+  };
 
   return (
     <Card className="w-full border-2" style={{borderColor: colors.accent, backgroundColor: colors.primary}}>
@@ -53,15 +64,15 @@ export function BARKTokenIWOAnalytics({ bids }: BARKTokenIWOAnalyticsProps) {
             config={{
               totalBids: {
                 label: "Total Bids",
-                color: "#dcd7cc",
+                color: colors.chartColors[0],
               },
               averageBidAmount: {
                 label: "Avg Bid Amount",
-                color: "#d0c8b9",
+                color: colors.chartColors[1],
               },
               averageVestingPeriod: {
                 label: "Avg Vesting Period",
-                color: "#afa088",
+                color: colors.chartColors[2],
               },
             }}
           >
@@ -86,7 +97,7 @@ export function BARKTokenIWOAnalytics({ bids }: BARKTokenIWOAnalyticsProps) {
                 <ChartTooltip 
                   content={
                     <ChartTooltipContent 
-                      formatValue={(value, dataKey) => {
+                      formatValue={(value: number, dataKey: string) => {
                         if (dataKey === 'totalBids') return value.toFixed(0);
                         if (dataKey === 'averageBidAmount') return value.toFixed(2);
                         if (dataKey === 'averageVestingPeriod') return value.toFixed(1);
@@ -95,10 +106,37 @@ export function BARKTokenIWOAnalytics({ bids }: BARKTokenIWOAnalyticsProps) {
                     />
                   }
                 />
-                <Legend />
-                <Line yAxisId="left" type="monotone" dataKey="totalBids" stroke="#dcd7cc" strokeWidth={2} activeDot={{ r: 8 }} />
-                <Line yAxisId="left" type="monotone" dataKey="averageBidAmount" stroke="#d0c8b9" strokeWidth={2} activeDot={{ r: 8 }} />
-                <Line yAxisId="right" type="monotone" dataKey="averageVestingPeriod" stroke="#afa088" strokeWidth={2} activeDot={{ r: 8 }} />
+                <Legend 
+                  onMouseEnter={handleMouseEnter}
+                  onMouseLeave={handleMouseLeave}
+                />
+                <Line 
+                  yAxisId="left" 
+                  type="monotone" 
+                  dataKey="totalBids" 
+                  stroke={colors.chartColors[0]} 
+                  strokeWidth={2} 
+                  activeDot={{ r: 8 }} 
+                  strokeOpacity={activeDataKey && activeDataKey !== 'totalBids' ? 0.3 : 1}
+                />
+                <Line 
+                  yAxisId="left" 
+                  type="monotone" 
+                  dataKey="averageBidAmount" 
+                  stroke={colors.chartColors[1]} 
+                  strokeWidth={2} 
+                  activeDot={{ r: 8 }} 
+                  strokeOpacity={activeDataKey && activeDataKey !== 'averageBidAmount' ? 0.3 : 1}
+                />
+                <Line 
+                  yAxisId="right" 
+                  type="monotone" 
+                  dataKey="averageVestingPeriod" 
+                  stroke={colors.chartColors[2]} 
+                  strokeWidth={2} 
+                  activeDot={{ r: 8 }} 
+                  strokeOpacity={activeDataKey && activeDataKey !== 'averageVestingPeriod' ? 0.3 : 1}
+                />
               </LineChart>
             </ResponsiveContainer>
           </ChartContainer>

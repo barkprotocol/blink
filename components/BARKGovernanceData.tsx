@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Connection, PublicKey } from '@solana/web3.js'
-import { getGovernanceProgramVersion, getRealm, getAllProposals } from '@solana/spl-governance'
+import { getGovernanceProgramVersion, getRealm, getAllProposals, Realm as RealmType, ProgramAccount, Proposal as ProposalType } from '@solana/spl-governance'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -33,21 +33,28 @@ export function SolanaGovernanceData() {
         const connection = new Connection(process.env.NEXT_PUBLIC_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com')
         const realmPublicKey = new PublicKey('BARKkeAwhTuFzcLHX4DjotRsmjXQ1MshGrZbn1CUQqMo')
 
-        const programVersion = await getGovernanceProgramVersion(connection, realmPublicKey)
+        const programId = await PublicKey.findProgramAddress(
+          [Buffer.from('governance')],
+          new PublicKey('GovernanceProgram1111111111111111111111111')
+        )
+        if (!programId[0]) {
+          throw new Error('Failed to find program address')
+        }
+        const programVersion = await getGovernanceProgramVersion(connection, programId[0])
         const realmInfo = await getRealm(connection, realmPublicKey)
 
         setRealm({
           name: realmInfo.account.name,
-          communityMintSupply: realmInfo.account.communityMint.supply.toNumber(),
+          communityMintSupply: realmInfo.account.communityMint.toNumber(),
           votingProposalCount: realmInfo.account.votingProposalCount
         })
 
-        const fetchedProposals = await getAllProposals(connection, realmPublicKey, programVersion)
-        const formattedProposals = fetchedProposals.map(p => ({
+        const fetchedProposals = await getAllProposals(connection, realmPublicKey)
+        const formattedProposals = fetchedProposals.map((p: ProgramAccount<ProposalType>) => ({
           name: p.account.name,
           state: p.account.state.toString(),
           yesVotes: p.account.getYesVoteCount().toNumber(),
-          noVotes: p.account.getNoVoteCount().toNumber()
+          noVotes: p.account.getNoVoteCount().toNumber(),
         }))
 
         setProposals(formattedProposals)
@@ -70,7 +77,8 @@ export function SolanaGovernanceData() {
           <CardDescription style={{color: colors.darkGray}}>Loading...</CardDescription>
         </CardHeader>
         <CardContent>
-          <Skeleton className="w-full h-[200px]" />
+          <p style={{color: colors.darkGray}}>Fetching governance data...</p>
+          <Skeleton className="w-full h-[200px] mt-4" />
         </CardContent>
       </Card>
     )
@@ -126,6 +134,9 @@ export function SolanaGovernanceData() {
             ))}
           </TableBody>
         </Table>
+        {proposals.length === 0 && (
+          <p style={{color: colors.darkGray}}>No active proposals at the moment.</p>
+        )}
       </CardContent>
     </Card>
   )

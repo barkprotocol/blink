@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { Line, LineChart, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { ChartContainer, ChartTooltip } from "@/components/ui/chart"
+import { Line, LineChart, XAxis, YAxis, Legend, ResponsiveContainer } from 'recharts'
 import { colors } from '../lib/colors'
 
 interface PriceData {
@@ -108,16 +108,21 @@ export function BARKTokenPriceChart() {
                     stroke={colors.darkGray}
                     tickFormatter={(value) => `$${value.toFixed(2)}`}
                   />
-                  <ChartTooltip 
-                    content={
-                      <ChartTooltipContent 
-                        formatValue={(value, dataKey) => {
-                          if (dataKey === 'price') return `$${Number(value).toFixed(2)}`;
-                          return `${value}`;
-                        }}
-                      />
-                    }
-                  />
+                  <ChartTooltip>
+                    {(props: { active: any; payload: any }) => {
+                      const { active, payload } = props;
+                      if (active && payload && payload.length) {
+                        const data = payload[0].payload;
+                        return (
+                          <div className="bg-white p-2 border border-gray-300 rounded shadow">
+                            <p className="text-sm text-gray-600">{new Date(data.date).toLocaleString()}</p>
+                            <p className="text-sm font-bold">${Number(data.price).toFixed(2)}</p>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  </ChartTooltip>
                   <Legend />
                   <Line 
                     type="monotone" 

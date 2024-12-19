@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Connection, PublicKey, clusterApiUrl, Transaction, SystemProgram, sendAndConfirmTransaction, LAMPORTS_PER_SOL } from '@solana/web3.js';
-import { Program, AnchorProvider, web3 as anchorWeb3, Idl, BN } from '@coral-xyz/anchor';
+import { Connection, PublicKey, clusterApiUrl, Transaction, SystemProgram, sendAndConfirmTransaction } from '@solana/web3.js';
+import { Program, AnchorProvider, Idl, BN, AnchorError } from '@coral-xyz/anchor';
 import idl from '@/lib/programs/iwo_program_idl.json';
-console.log('IDL:', idl);
 
 export const TOTAL_SUPPLY = 18_446_744_073;
 export const CIRCULATING_SUPPLY = 18_228_391_052.057774;
@@ -21,7 +20,6 @@ export interface Bid {
 
 const BARK_TOKEN_MINT_ADDRESS = new PublicKey(process.env.NEXT_PUBLIC_TOKEN_PROGRAM_ID || '2NTvEssJ2i998V2cMGT4Fy3JhyFnAzHFonDo9dbAkVrg');
 const IWO_POOL_ID = new PublicKey(process.env.NEXT_PUBLIC_IWO_CONTRACT_ADDRESS || 'BARKkeAwhTuFzcLHX4DjotRsmjXQ1MshGrZbn1CUQqMo');
-const VESTING_PROGRAM_ID = new PublicKey('GKb2vF9RE1UPhV6hQi7yiL5tCsdajbJHyTm87zhN3qiU');
 
 let connection: Connection;
 let program: Program;
@@ -30,23 +28,27 @@ export async function initializeSolanaConnection() {
   connection = new Connection(process.env.NEXT_PUBLIC_SOLANA_RPC_URL || clusterApiUrl('devnet'), 'confirmed');
   if (typeof window !== 'undefined' && (window as any).solana) {
     try {
+      const wallet = (window as any).solana;
       const provider = new AnchorProvider(
         connection, 
-        (window as any).solana, 
+        wallet,
         { preflightCommitment: 'confirmed' }
       );
-      console.log('Provider:', provider);
-      console.log('IWO_POOL_ID:', IWO_POOL_ID.toBase58());
 
       if (!idl) {
         throw new Error('IDL is undefined. Make sure the IDL file is properly imported.');
       }
 
-      if (!IWO_POOL_ID) {
-        throw new Error('IWO_POOL_ID is undefined. Check your environment variables.');
-      }
+      const completeIdl: Idl = {
+        ...(idl as unknown as Idl),
+        metadata: {
+          name: "iwo_program",
+          version: "0.1.0",
+          spec: ''
+        },
+      };
 
-      program = new Program(idl as unknown as Idl, IWO_POOL_ID, provider);
+      program = new Program(completeIdl, IWO_POOL_ID, provider);
       
       if (!program) {
         throw new Error('Failed to initialize program. Check your IDL and IWO_POOL_ID.');
@@ -55,6 +57,10 @@ export async function initializeSolanaConnection() {
       console.log('Program initialized successfully');
     } catch (error) {
       console.error('Error initializing program:', error);
+      if (error instanceof AnchorError) {
+        console.error('AnchorError:', error.message);
+        console.error('Error logs:', error.logs);
+      }
       if (error instanceof Error) {
         throw new Error(`Failed to initialize Solana connection: ${error.message}`);
       } else {
@@ -63,14 +69,6 @@ export async function initializeSolanaConnection() {
     }
   } else {
     throw new Error('Solana object not found! Make sure you have a Solana wallet installed.');
-  }
-}
-
-export async function initializeMultiChainConnection(chain: 'solana' | 'sui') {
-  if (chain === 'solana') {
-    await initializeSolanaConnection();
-  } else if (chain === 'sui') {
-    console.log('SUI connection not yet implemented');
   }
 }
 
@@ -119,10 +117,11 @@ export async function submitBidToBlockchain(amount: number, vestingPeriod: numbe
   );
 
   try {
+    const wallet = (window as any).solana;
     const signature = await sendAndConfirmTransaction(
       connection,
       transaction,
-      [(window as any).solana.wallet.adapter]
+      [wallet]
     );
     return signature;
   } catch (error) {
@@ -155,15 +154,15 @@ export function useIWOData(chain: 'solana' | 'sui' = 'solana') {
     let isMounted = true;
     const fetchData = async () => {
       try {
-        await initializeMultiChainConnection(chain);
+        await initializeSolanaConnection();
         const allocated = await fetchAllocatedTokens();
         if (isMounted) setAllocatedTokens(allocated);
 
         if (program) {
           // Fetch bids from the program
-          const fetchedBids = await program.account.iwoPool.fetch(IWO_POOL_ID);
-          if (isMounted && fetchedBids.bids) {
-            const formattedBids: Bid[] = fetchedBids.bids.map((bid: any) => ({
+          const iwoPool = await program.account.iwoPool.fetch(IWO_POOL_ID);
+          if (isMounted && iwoPool && 'bids' in iwoPool) {
+            const formattedBids: Bid[] = (iwoPool.bids as any[]).map((bid: any) => ({
               id: bid.publicKey.toBase58(),
               userId: bid.account.bidder.toBase58(),
               amount: bid.account.amount.toNumber(),

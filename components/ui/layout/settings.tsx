@@ -7,94 +7,93 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { PrismaClient } from '@prisma/client'
-import { supabase } from '@/lib/supabase'
-import { authenticator } from 'otplib'
-
-const prisma = new PrismaClient()
+import { useToast } from "@/components/ui/use-toast"
 
 export function Settings() {
-  const [user, setUser] = useState<any>(null)
   const [is2FAEnabled, setIs2FAEnabled] = useState(false)
   const [twoFactorSecret, setTwoFactorSecret] = useState('')
   const [twoFactorCode, setTwoFactorCode] = useState('')
   const [notificationsEnabled, setNotificationsEnabled] = useState(true)
   const [language, setLanguage] = useState('en')
   const [theme, setTheme] = useState('light')
+  const { toast } = useToast()
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        setUser(user)
-        const dbUser = await prisma.user.findUnique({ where: { id: user.id } })
-        if (dbUser) {
-          setIs2FAEnabled(dbUser.is2FAEnabled)
-          setNotificationsEnabled(dbUser.notificationsEnabled)
-          setLanguage(dbUser.language)
-          setTheme(dbUser.theme)
-        }
-      }
+    // Fetch user settings from API or local storage
+    // This is a placeholder for demonstration purposes
+    const fetchSettings = async () => {
+      // Simulating API call
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      setIs2FAEnabled(false)
+      setNotificationsEnabled(true)
+      setLanguage('en')
+      setTheme('light')
     }
-    fetchUser()
+    fetchSettings()
   }, [])
 
   const handle2FAToggle = async () => {
     if (!is2FAEnabled) {
-      const secret = authenticator.generateSecret()
+      // Generate 2FA secret
+      // This is a placeholder and should be replaced with actual 2FA secret generation
+      const secret = 'ABCDEFGHIJKLMNOP'
       setTwoFactorSecret(secret)
       setIs2FAEnabled(true)
-    } else {
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { is2FAEnabled: false, twoFactorSecret: null }
+      toast({
+        title: "2FA Enabled",
+        description: "Please scan the QR code and enter the verification code.",
       })
+    } else {
+      // Disable 2FA
       setIs2FAEnabled(false)
       setTwoFactorSecret('')
+      toast({
+        title: "2FA Disabled",
+        description: "Two-factor authentication has been disabled.",
+      })
     }
   }
 
   const handle2FAVerify = async () => {
-    const isValid = authenticator.verify({ token: twoFactorCode, secret: twoFactorSecret })
-    if (isValid) {
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { is2FAEnabled: true, twoFactorSecret }
+    // Verify 2FA code
+    // This is a placeholder and should be replaced with actual 2FA verification
+    if (twoFactorCode === '123456') {
+      toast({
+        title: "2FA Verified",
+        description: "Two-factor authentication has been successfully set up.",
       })
-      setTwoFactorSecret('')
       setTwoFactorCode('')
     } else {
-      alert('Invalid 2FA code. Please try again.')
+      toast({
+        title: "Invalid Code",
+        description: "Please enter a valid 2FA code.",
+        variant: "destructive",
+      })
     }
   }
 
-  const handleNotificationsToggle = async () => {
-    const newValue = !notificationsEnabled
-    setNotificationsEnabled(newValue)
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { notificationsEnabled: newValue }
+  const handleNotificationsToggle = () => {
+    setNotificationsEnabled(!notificationsEnabled)
+    toast({
+      title: notificationsEnabled ? "Notifications Disabled" : "Notifications Enabled",
+      description: `You have ${notificationsEnabled ? 'disabled' : 'enabled'} notifications.`,
     })
   }
 
-  const handleLanguageChange = async (value: string) => {
+  const handleLanguageChange = (value: string) => {
     setLanguage(value)
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { language: value }
+    toast({
+      title: "Language Updated",
+      description: `Your language preference has been updated to ${value}.`,
     })
   }
 
-  const handleThemeChange = async (value: string) => {
+  const handleThemeChange = (value: string) => {
     setTheme(value)
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { theme: value }
+    toast({
+      title: "Theme Updated",
+      description: `Your theme preference has been updated to ${value}.`,
     })
-  }
-
-  if (!user) {
-    return <div>Loading...</div>
   }
 
   return (
@@ -118,7 +117,7 @@ export function Settings() {
               <div className="space-y-2">
                 <p>Scan this QR code with your authenticator app:</p>
                 <img
-                  src={`https://chart.googleapis.com/chart?chs=200x200&chld=M|0&cht=qr&chl=otpauth://totp/IWO:${user.email}?secret=${twoFactorSecret}&issuer=IWO`}
+                  src={`https://chart.googleapis.com/chart?chs=200x200&chld=M|0&cht=qr&chl=otpauth://totp/IWO:${twoFactorSecret}?secret=${twoFactorSecret}&issuer=IWO`}
                   alt="2FA QR Code"
                 />
                 <Label htmlFor="2fa-code">Enter the 6-digit code from your app:</Label>

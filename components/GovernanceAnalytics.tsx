@@ -91,7 +91,7 @@ export function GovernanceAnalytics() {
                   cursor={{fill: `${colors.accent}20`}}
                   content={
                     <ChartTooltipContent 
-                      styles={{
+                      style={{
                         root: { backgroundColor: colors.primary, border: `1px solid ${colors.accent}`, borderRadius: '4px', padding: '8px' },
                         label: { color: colors.secondary, fontWeight: 'bold' },
                         value: { color: colors.darkGray }
@@ -125,3 +125,4 @@ export function GovernanceAnalytics() {
     </Card>
   )
 }
+

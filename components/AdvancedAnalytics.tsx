@@ -109,7 +109,7 @@ export function AdvancedAnalytics({ bids }: AdvancedAnalyticsProps) {
                 <ChartTooltip 
                   content={
                     <ChartTooltipContent 
-                      formatValue={(value, dataKey) => {
+                      formatValue={(value: number, dataKey: string) => {
                         if (dataKey === 'totalBids') return value.toFixed(0);
                         if (dataKey === 'averageBidAmount') return `${value.toFixed(2)} BARK`;
                         if (dataKey === 'averageVestingPeriod') return `${value.toFixed(2)} months`;
