@@ -35,16 +35,22 @@ The IWO Interface is built on a modern, scalable architecture:
 
 ## 3. Key Components
 
-### 3.1 **IWO Dashboard**
+### 3.1 **IWO Interface**
+The main component that orchestrates the entire IWO process.
+
+### 3.2 **IWO Dashboard**
 Centralized hub for real-time statistics, token allocation progress, and remaining time in the offering.
 
-### 3.2 **Bid Simulator**
+### 3.3 **Bid Simulator**
 Interactive tool that allows users to test bid amounts and vesting periods, previewing potential weight calculations.
 
-### 3.3 **Leaderboard**
+### 3.4 **Leaderboard**
 Dynamic list of top participants ranked by their bid weights, updated in real-time.
 
-### 3.4 **Token Chart**
+### 3.5 **Governance Analytics**
+Real-time BARK Protocol Governance data from Solana Realms
+
+### 3.6 **Token Chart**
 Historical BARK token price visualizations for trend tracking and insights.
 
 ---
