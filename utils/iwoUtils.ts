@@ -42,7 +42,7 @@ export async function initializeSolanaConnection() {
 
       // Ensure the IDL is properly structured
       const completeIdl: Idl = {
-        ...idl as unknown as Idl,
+        ...idl,
         metadata: {
           address: IWO_POOL_ID.toString(),
         },
@@ -124,8 +124,7 @@ export async function submitBidToBlockchain(amount: number, vestingPeriod: numbe
     const signature = await sendAndConfirmTransaction(
       connection,
       transaction,
-      [wallet.payer],
-      { commitment: 'confirmed' }
+      [wallet]
     );
     return signature;
   } catch (error: unknown) {

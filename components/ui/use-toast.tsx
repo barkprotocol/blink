@@ -12,6 +12,7 @@ interface ToastContextValue {
   toasts: Toast[]
   addToast: (toast: Omit<Toast, 'id'>) => void
   removeToast: (id: number) => void
+  toast: (props: Omit<Toast, 'id'>) => void
 }
 
 const useToast = (): ToastContextValue => {
@@ -28,7 +29,11 @@ const useToast = (): ToastContextValue => {
     setToasts((prevToasts) => prevToasts.filter((toast) => toast.id !== id))
   }, [])
 
-  return { toasts, addToast, removeToast }
+  const toast = useCallback((props: Omit<Toast, 'id'>) => {
+    addToast(props)
+  }, [addToast])
+
+  return { toasts, addToast, removeToast, toast }
 }
 
 export { useToast }

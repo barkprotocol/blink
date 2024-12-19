@@ -170,3 +170,4 @@ export function TokenAllocationChart({ bids, totalWeight }: TokenAllocationChart
     </Card>
   )
 }
+
